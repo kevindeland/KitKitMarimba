@@ -1,5 +1,6 @@
 package com.enuma.marimba.activity;
 
+import android.annotation.SuppressLint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
@@ -15,6 +16,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import com.enuma.marimba.R;
+import com.enuma.marimba.song.Song;
+import com.enuma.marimba.song.SongBank;
 import com.enuma.marimba.ui.Theme;
 import com.enuma.marimba.ui.Themes;
 import com.enuma.marimba.utility.EffectSound;
@@ -39,7 +42,13 @@ public class MainActivity extends AppCompatActivity {
     private EffectSound mEffectSound;
     private Handler mHandler = new Handler();
 
+    // theme switching
     private ImageView mVThemeSwitch;
+
+    // play songs
+    private ImageView mVPlay1;
+    private ImageView mVPlay2;
+    private ImageView mVPlay3;
 
     private View mDecorView;
     private int mUiOption;
@@ -56,42 +65,26 @@ public class MainActivity extends AppCompatActivity {
         mEffectSound = EffectSound.getInstance(this);
 
         setupView();
+        setupPlayListeners();
 
         if (savedInstanceState == null) {
-            /*mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mEffectSound.startSoundPool(EffectSound.SOUND_INTRO);
-                }
-            }, 300);*/
 
-            for (int i=0; i < EffectSound.SOUND_INTRO; i++) {
-                final int finalI = i;
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mEffectSound.startSoundPool(finalI);
-
-                    }
-                }, i * 400 + 500);
-            }
-
-            for (int i=EffectSound.SOUND_INTRO - 2; i >= 0; i--) {
-                final int finalI = i;
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mEffectSound.startSoundPool(finalI);
-
-                    }
-                }, (EffectSound.SOUND_INTRO - 1) * 400 + 500 + (EffectSound.SOUND_INTRO - finalI -1) * 400);
-            }
+            playGlissando();
         }
+    }
+
+    private void playGlissando() {
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mEffectSound.startSoundPool(EffectSound.SOUND_INTRO);
+            }
+        }, 300);
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
-        if (hasFocus == true) {
+        if (hasFocus) {
             mDecorView.setSystemUiVisibility(mUiOption);
         }
     }
@@ -138,6 +131,33 @@ public class MainActivity extends AppCompatActivity {
         nextTheme();
     }
 
+    /**
+     * set up buttons to play a song
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    private void setupPlayListeners() {
+        mVPlay1 = (ImageView) findViewById(R.id.v_play1);
+        mVPlay2 = (ImageView) findViewById(R.id.v_play2);
+        mVPlay3 = (ImageView) findViewById(R.id.v_play3);
+
+        mVPlay1.setOnTouchListener(new SongPlayListener(SongBank.FUN_THING_1));
+        mVPlay2.setOnTouchListener(new SongPlayListener(SongBank.FUN_THING_2));
+    }
+
+    class SongPlayListener implements View.OnTouchListener {
+
+        Song _song;
+
+        SongPlayListener(Song song) {
+            _song = song;
+        }
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            playSong(_song);
+            return false;
+        }
+    }
+
     private void setScale(View rootView) {
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -170,6 +190,25 @@ public class MainActivity extends AppCompatActivity {
     private void startAnimation(View v) {
         Animation animation = AnimationUtils.loadAnimation(this, R.anim.scale);
         v.startAnimation(animation);
+    }
+
+
+    /**
+     * Play a song, with the notes inside one array and the times inside another.
+     * {@code notes} should be the same size as {@code times}
+     *
+     */
+    private void playSong(Song song) {
+
+        for (int i=0; i < song._numNotes; i++) {
+            final Song.Note note = song._notes[i];
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    selectBar(note._note);
+                }
+            }, note._time);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -236,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
                     mTempRect.right = (int)(mTempRect.right / mScale);
                     mTempRect.bottom = (int)(mTempRect.bottom / mScale);
 
-                    if (mTempRect.contains((int) x, (int) y) == true) {
+                    if (mTempRect.contains((int) x, (int) y)) {
                         if (mTouchInfo.get(touchId) != j) {
                             mTouchInfo.put(touchId, j);
                             selectBar(j);
@@ -247,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                if (bSelect == false) {
+                if (!bSelect) {
                     mTouchInfo.put(touchId, -1);
                 }
             }
