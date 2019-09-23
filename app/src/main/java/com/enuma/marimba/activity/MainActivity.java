@@ -12,8 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 
 import com.enuma.marimba.R;
+import com.enuma.marimba.ui.Theme;
+import com.enuma.marimba.ui.Themes;
 import com.enuma.marimba.utility.EffectSound;
 import com.enuma.marimba.utility.Log;
 import com.enuma.marimba.utility.Util;
@@ -28,7 +31,10 @@ public class MainActivity extends AppCompatActivity {
 
     ////////////////////////////////////////////////////////////////////////////////
 
+    private View mVBackground;
+    private ImageView mVFrame;
     private View[] mVBars = new View[MAX_BAR_COUNT];
+    private ImageView[] mVBarImages = new ImageView[MAX_BAR_COUNT];
     private Rect mTempRect = new Rect();
     private EffectSound mEffectSound;
     private Handler mHandler = new Handler();
@@ -111,15 +117,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupView() {
         findViewById(R.id.v_back).setOnClickListener(mOnClickListener);
+        findViewById(R.id.v_theme).setOnClickListener(mThemeListener);
         View rootView = findViewById(R.id.layout_root);
+        mVBackground = rootView;
         rootView.setOnTouchListener(mOnTouchListener);
+
+        mVFrame = (ImageView) findViewById(R.id.imageFrame);
 
         String packageName = getPackageName();
         for (int i = 0; i < MAX_BAR_COUNT; ++i) {
             mVBars[i] = findViewById(Util.getResourceId(this, "v_bar_" + i, "id", packageName));
+            mVBarImages[i] = (ImageView) findViewById(Util.getResourceId(this, "v_barBody_" + i, "id", packageName));
         }
 
         setScale(rootView);
+
+        setTheme(Themes.cycleTheme());
     }
 
     private void setScale(View rootView) {
@@ -166,6 +179,14 @@ public class MainActivity extends AppCompatActivity {
             if (id == R.id.v_back) {
                 finish();
             }
+        }
+    };
+
+    private View.OnClickListener mThemeListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            setTheme(Themes.cycleTheme());
+
         }
     };
 
@@ -230,4 +251,19 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
     };
+
+    /**
+     * Change theme.
+     * @param theme
+     */
+    private void setTheme(Theme theme) {
+        mVBackground.setBackground(getResources().getDrawable(theme._backgroundResId));
+        mVFrame.setImageDrawable(getResources().getDrawable(theme._frameResId));
+
+        for (int j = 0; j < mVBars.length; ++j) {
+            mVBars[j].setBackground(getResources().getDrawable(theme._barEffectIds[j]));
+            mVBarImages[j].setImageDrawable(getResources().getDrawable(theme._barBodyIds[j]));
+        }
+
+    }
 }
