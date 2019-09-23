@@ -30,7 +30,7 @@
             android:layout_marginTop="30px"
             android:alpha="0.65"
             android:layout_alignParentRight="true"
-            android:background="@drawable/selector_back" />
+            android:background="@drawable/selector_theme_original" />
 
     </RelativeLayout>
 

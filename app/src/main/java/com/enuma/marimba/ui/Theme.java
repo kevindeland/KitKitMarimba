@@ -18,11 +18,15 @@ public class Theme {
     // Bodies
     public int[] _barBodyIds;
 
-    public Theme(int background, int frame, int[] effects, int[] bodies) {
+    // Button
+    public int _buttonId;
+
+    public Theme(int background, int frame, int[] effects, int[] bodies, int button) {
         this._backgroundResId = background;
         this._frameResId = frame;
         this._barEffectIds = effects;
         this._barBodyIds = bodies;
+        this._buttonId = button;
     }
 
 

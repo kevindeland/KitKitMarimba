@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private EffectSound mEffectSound;
     private Handler mHandler = new Handler();
 
+    private ImageView mVThemeSwitch;
+
     private View mDecorView;
     private int mUiOption;
 
@@ -123,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
         rootView.setOnTouchListener(mOnTouchListener);
 
         mVFrame = (ImageView) findViewById(R.id.imageFrame);
+        mVThemeSwitch = (ImageView) findViewById(R.id.v_theme);
 
         String packageName = getPackageName();
         for (int i = 0; i < MAX_BAR_COUNT; ++i) {
@@ -132,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
         setScale(rootView);
 
-        setTheme(Themes.cycleTheme());
+        nextTheme();
     }
 
     private void setScale(View rootView) {
@@ -185,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener mThemeListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            setTheme(Themes.cycleTheme());
+            nextTheme();
 
         }
     };
@@ -254,9 +257,9 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Change theme.
-     * @param theme
      */
-    private void setTheme(Theme theme) {
+    private void nextTheme() {
+        Theme theme = Themes.cycleTheme();
         mVBackground.setBackground(getResources().getDrawable(theme._backgroundResId));
         mVFrame.setImageDrawable(getResources().getDrawable(theme._frameResId));
 
@@ -264,6 +267,9 @@ public class MainActivity extends AppCompatActivity {
             mVBars[j].setBackground(getResources().getDrawable(theme._barEffectIds[j]));
             mVBarImages[j].setImageDrawable(getResources().getDrawable(theme._barBodyIds[j]));
         }
+
+        // ThemeSwitch button will display button of *next* Theme, not this theme.
+        mVThemeSwitch.setImageDrawable(getResources().getDrawable(Themes.peekNext()._buttonId));
 
     }
 }
